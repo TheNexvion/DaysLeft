@@ -1,0 +1,26 @@
+*.iml
+.gradle/
+local.properties
+.idea/
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db
+build/
+/build/
+/app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+/app/schemas/
+*.apk
+*.aab
+*.ap_
+*.hprof
+*.log
+
+# Keystores and signing credentials (DO NOT COMMIT)
+*.jks
+*.keystore
+keystore.properties
+signing.properties
