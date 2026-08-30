@@ -254,7 +254,7 @@ fun HomeScreen(
                                 scope.launch { drawerState.close() }
                                 val intent = Intent(
                                     Intent.ACTION_VIEW,
-                                    Uri.parse("https://github.com/YOUR_USERNAME/days-left")
+                                    Uri.parse("https://github.com/TheNexvion/DaysLeft")
                                 )
                                 context.startActivity(intent)
                             },

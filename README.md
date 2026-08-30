@@ -46,7 +46,7 @@ Room DAO (SQLite operations)
 
 To install the application directly on your Android device:
 
-1. Download **`Days-Left-v1.0.0.apk`** from the website or GitHub Releases.
+1. Download **`Days-Left-v1.0.0.apk`** from the website or [GitHub Releases](https://github.com/TheNexvion/DaysLeft/releases).
 2. Open the downloaded APK file on your device.
 3. If prompted by Android, allow installing apps from your browser or file manager.
 4. Tap **Install** and launch **Days Left**.
@@ -91,7 +91,7 @@ For full details, please review [PRIVACY.md](PRIVACY.md).
 
 ## Open Source
 
-The complete source code for Days Left is open source and publicly available on GitHub. Contributions, issue reports, and feedback are welcome.
+The complete source code for Days Left is open source and publicly available on GitHub at [https://github.com/TheNexvion/DaysLeft](https://github.com/TheNexvion/DaysLeft). Contributions, issue reports, and feedback are welcome.
 
 ## License
 
