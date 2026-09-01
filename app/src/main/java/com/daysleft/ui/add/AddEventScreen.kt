@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -40,12 +42,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.daysleft.ui.theme.Primary
-import com.daysleft.ui.theme.Surface
+import com.daysleft.ui.components.DatePresetChips
+import com.daysleft.ui.components.LiveCountdownPreview
+import com.daysleft.ui.components.ReminderSection
+import com.daysleft.ui.theme.AppTheme
 import com.daysleft.util.DateUtils
 import java.time.Instant
 import java.time.ZoneOffset
@@ -53,11 +59,19 @@ import java.time.ZoneOffset
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEventScreen(
+    initialTitle: String = "",
     onNavigateBack: () -> Unit,
     viewModel: AddEventViewModel = viewModel(factory = AddEventViewModel.Factory)
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDatePicker by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+
+    LaunchedEffect(initialTitle) {
+        if (initialTitle.isNotBlank()) {
+            viewModel.setInitialTitle(initialTitle)
+        }
+    }
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -70,9 +84,9 @@ fun AddEventScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Add Event",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Medium,
+                        text = "Create Countdown",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -86,7 +100,7 @@ fun AddEventScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Surface
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
@@ -99,7 +113,7 @@ fun AddEventScreen(
                 .navigationBarsPadding()
                 .imePadding()
         ) {
-            // Scrollable Form Content (Fills available space)
+            // Form content
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -109,72 +123,92 @@ fun AddEventScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Event Name
+                // Event Name Field
                 Text(
-                    text = "Event name",
-                    style = MaterialTheme.typography.labelLarge,
+                    text = "Event Name",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
+
                 OutlinedTextField(
                     value = uiState.title,
                     onValueChange = viewModel::updateTitle,
-                    placeholder = { Text("e.g. My Birthday") },
+                    placeholder = { Text("e.g. Birthday, Vacation, Exam") },
                     isError = uiState.titleError != null,
                     supportingText = uiState.titleError?.let { error ->
-                        { Text(error) }
+                        { Text(error, color = MaterialTheme.colorScheme.error) }
+                    },
+                    trailingIcon = {
+                        if (uiState.title.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.updateTitle("") }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Clear,
+                                    contentDescription = "Clear text",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = AppTheme.shapes.TextField,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Event Date
+                // Event Date Header + Quick Preset Chips
                 Text(
-                    text = "Event date",
-                    style = MaterialTheme.typography.labelLarge,
+                    text = "Target Date",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+
+                DatePresetChips(
+                    selectedDate = uiState.date,
+                    onSelectDate = viewModel::updateDate,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = uiState.date?.let { DateUtils.formatDate(it) } ?: "",
+                        value = uiState.date?.let { DateUtils.formatDateWithDay(it) } ?: "",
                         onValueChange = { },
-                        placeholder = { Text("Select a date") },
+                        placeholder = { Text("Select date from calendar") },
                         readOnly = true,
                         isError = uiState.dateError != null,
                         supportingText = uiState.dateError?.let { error ->
-                            { Text(error) }
+                            { Text(error, color = MaterialTheme.colorScheme.error) }
                         },
                         trailingIcon = {
                             IconButton(onClick = { showDatePicker = true }) {
                                 Icon(
                                     imageVector = Icons.Filled.CalendarToday,
-                                    contentDescription = "Select date",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    contentDescription = "Open date picker",
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         },
-                        shape = RoundedCornerShape(8.dp),
+                        shape = AppTheme.shapes.TextField,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                             focusedContainerColor = MaterialTheme.colorScheme.surface,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
-                    // Clickable transparent overlay across date field
+
+                    // Clickable overlay across entire date field
                     Box(
                         modifier = Modifier
                             .matchParentSize()
@@ -187,27 +221,58 @@ fun AddEventScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Reminders Section
+                ReminderSection(
+                    remindersEnabled = uiState.remindersEnabled,
+                    onRemindersEnabledChange = viewModel::updateRemindersEnabled,
+                    remindSevenDaysBefore = uiState.remindSevenDaysBefore,
+                    onRemindSevenDaysChange = viewModel::updateRemindSevenDaysBefore,
+                    remindOneDayBefore = uiState.remindOneDayBefore,
+                    onRemindOneDayChange = viewModel::updateRemindOneDayBefore,
+                    remindOnDay = uiState.remindOnDay,
+                    onRemindOnDayChange = viewModel::updateRemindOnDay,
+                    reminderHour = uiState.reminderHour,
+                    reminderMinute = uiState.reminderMinute,
+                    onReminderTimeChange = viewModel::updateReminderTime
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Live Preview
+                LiveCountdownPreview(
+                    title = uiState.title,
+                    date = uiState.date
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // Bottom Save Event Button (Always anchored at bottom, elevated smoothly by imePadding)
+            // Bottom CTA Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 16.dp)
             ) {
                 Button(
-                    onClick = viewModel::saveEvent,
-                    shape = RoundedCornerShape(percent = 50),
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        viewModel.saveEvent()
+                    },
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
                 ) {
                     Text(
-                        text = "Save Event",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium
+                        text = "Create Countdown",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -222,6 +287,7 @@ fun AddEventScreen(
 
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
+            shape = AppTheme.shapes.Dialog,
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -234,7 +300,7 @@ fun AddEventScreen(
                         showDatePicker = false
                     }
                 ) {
-                    Text("OK", color = Primary)
+                    Text("OK", fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {

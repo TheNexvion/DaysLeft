@@ -1,6 +1,7 @@
 package com.daysleft.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,7 +18,7 @@ import kotlinx.serialization.Serializable
 object HomeRoute
 
 @Serializable
-object AddEventRoute
+data class AddEventRoute(val initialTitle: String = "")
 
 @Serializable
 data class EditEventRoute(val eventId: Long)
@@ -27,23 +28,36 @@ data class EventDetailsRoute(val eventId: Long)
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    targetEventId: Long? = null,
+    onTargetEventHandled: () -> Unit = {}
 ) {
+    LaunchedEffect(targetEventId) {
+        if (targetEventId != null && targetEventId > 0) {
+            navController.navigate(EventDetailsRoute(targetEventId))
+            onTargetEventHandled()
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = HomeRoute
     ) {
         composable<HomeRoute> {
             HomeScreen(
-                onAddEvent = { navController.navigate(AddEventRoute) },
+                onAddEvent = { templateTitle ->
+                    navController.navigate(AddEventRoute(initialTitle = templateTitle))
+                },
                 onEventClick = { eventId ->
                     navController.navigate(EventDetailsRoute(eventId))
                 }
             )
         }
 
-        composable<AddEventRoute> {
+        composable<AddEventRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<AddEventRoute>()
             AddEventScreen(
+                initialTitle = route.initialTitle,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

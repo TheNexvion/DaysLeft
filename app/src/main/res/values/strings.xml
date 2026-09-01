@@ -1,3 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App & General -->
     <string name="app_name">Days Left</string>
+    <string name="app_tagline">Never miss an important date</string>
+    <string name="app_version_info">Version 1.0.0 — Offline-First</string>
+
+    <!-- Navigation & Titles -->
+    <string name="nav_your_countdowns">Your Countdowns</string>
+    <string name="nav_information">Information</string>
+    <string name="nav_about">About</string>
+    <string name="nav_privacy_policy">Privacy Policy</string>
+    <string name="nav_source_code">Source Code (GitHub)</string>
+    <string name="title_create_countdown">Create Countdown</string>
+    <string name="title_edit_countdown">Edit Countdown</string>
+    <string name="title_event_details">Event Details</string>
+
+    <!-- Actions & Buttons -->
+    <string name="action_create_countdown">Create Countdown</string>
+    <string name="action_save_changes">Save Changes</string>
+    <string name="action_edit_countdown">Edit Countdown</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_discard">Discard</string>
+    <string name="action_keep_editing">Keep Editing</string>
+    <string name="action_return_to_home">Return to Home</string>
+
+    <!-- Form Fields & Placeholders -->
+    <string name="label_event_name">Event Name</string>
+    <string name="placeholder_event_name">e.g. Birthday, Vacation, Exam</string>
+    <string name="label_target_date">Target Date</string>
+    <string name="placeholder_select_date">Select date from calendar</string>
+    <string name="label_reminders">Reminders</string>
+    <string name="label_reminders_active">Reminders are active</string>
+    <string name="label_no_reminders">No reminders scheduled</string>
+    <string name="label_notify_me">NOTIFY ME</string>
+    <string name="label_reminder_time">Reminder Time</string>
+    <string name="label_select_reminder_time">Select Reminder Time</string>
+    <string name="label_live_preview">LIVE PREVIEW</string>
+    <string name="label_target_date_caps">TARGET DATE</string>
+    <string name="label_reminders_caps">REMINDERS</string>
+    <string name="label_disabled">Disabled</string>
+
+    <!-- Presets & Intervals -->
+    <string name="preset_tomorrow">Tomorrow</string>
+    <string name="preset_this_weekend">This Weekend</string>
+    <string name="preset_in_one_week">In 1 Week</string>
+    <string name="preset_in_one_month">In 1 Month</string>
+    <string name="reminder_seven_days_before">7 days before</string>
+    <string name="reminder_one_day_before">1 day before</string>
+    <string name="reminder_on_the_day">On the day</string>
+
+    <!-- Empty State -->
+    <string name="empty_title">No countdowns yet</string>
+    <string name="empty_description">Create your first countdown and keep important dates in sight.</string>
+    <string name="label_quick_templates">QUICK TEMPLATES</string>
+    <string name="template_birthday">Birthday</string>
+    <string name="template_exam">Exam</string>
+    <string name="template_vacation">Vacation</string>
+    <string name="template_anniversary">Anniversary</string>
+
+    <!-- Validation & Errors -->
+    <string name="error_enter_event_name">Please enter an event name</string>
+    <string name="error_select_target_date">Please select a target date</string>
+    <string name="not_found_title">Countdown not found</string>
+    <string name="not_found_description">This countdown may have been deleted or does not exist.</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_delete_title">Delete countdown?</string>
+    <string name="dialog_delete_message">This countdown will be permanently removed.</string>
+    <string name="dialog_discard_title">Discard changes?</string>
+    <string name="dialog_discard_message">Your changes have not been saved. Are you sure you want to discard them?</string>
+    <string name="dialog_about_title">About Days Left</string>
+    <string name="dialog_about_message">Days Left is a simple, private, offline countdown app to track important dates and milestones.\n\nVersion 1.0.0\n100% Offline &amp; Open Source.</string>
+    <string name="dialog_privacy_title">Privacy Policy</string>
+    <string name="dialog_privacy_message">Days Left stores all your data strictly on your local device using SQLite Room. Zero data is collected, tracked, transmitted, or shared. No internet connection is needed or used.</string>
+
+    <!-- Accessibility Descriptions -->
+    <string name="cd_go_back">Go back</string>
+    <string name="cd_delete_countdown">Delete countdown</string>
+    <string name="cd_open_date_picker">Open date picker</string>
+    <string name="cd_clear_text">Clear text</string>
+    <string name="cd_open_nav_drawer">Open navigation drawer</string>
+    <string name="cd_more_options">More options</string>
+    <string name="cd_create_countdown">Create countdown</string>
 </resources>

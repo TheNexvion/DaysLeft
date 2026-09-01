@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.DaysLeft" parent="android:Theme.Material.NoActionBar" />
+
+    <style name="Theme.DaysLeft.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#121318</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.DaysLeft</item>
+    </style>
+</resources>

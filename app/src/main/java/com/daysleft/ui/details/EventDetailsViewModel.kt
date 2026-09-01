@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.daysleft.data.local.AppDatabase
+import com.daysleft.DaysLeftApplication
 import com.daysleft.data.local.Event
 import com.daysleft.data.repository.EventRepository
+import com.daysleft.reminder.ReminderScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class EventDetailsUiState(
@@ -18,9 +20,13 @@ data class EventDetailsUiState(
     val isDeleted: Boolean = false
 )
 
+/**
+ * ViewModel for observing single event details and handling deletion.
+ */
 class EventDetailsViewModel(
     private val repository: EventRepository,
-    private val eventId: Long
+    private val eventId: Long,
+    private val reminderScheduler: ReminderScheduler? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EventDetailsUiState())
@@ -33,18 +39,21 @@ class EventDetailsViewModel(
     private fun observeEvent() {
         viewModelScope.launch {
             repository.getEventById(eventId).collect { event ->
-                _uiState.value = _uiState.value.copy(
-                    event = event,
-                    isLoading = false
-                )
+                _uiState.update {
+                    it.copy(
+                        event = event,
+                        isLoading = false
+                    )
+                }
             }
         }
     }
 
     fun deleteEvent() {
         viewModelScope.launch {
+            reminderScheduler?.cancelEventReminders(eventId)
             repository.deleteEventById(eventId)
-            _uiState.value = _uiState.value.copy(isDeleted = true)
+            _uiState.update { it.copy(isDeleted = true) }
         }
     }
 
@@ -57,10 +66,12 @@ class EventDetailsViewModel(
                     extras: CreationExtras
                 ): T {
                     val application =
-                        extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
-                    val database = AppDatabase.getInstance(application)
-                    val repository = EventRepository(database.eventDao())
-                    return EventDetailsViewModel(repository, eventId) as T
+                        extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as DaysLeftApplication
+                    return EventDetailsViewModel(
+                        repository = application.container.repository,
+                        eventId = eventId,
+                        reminderScheduler = application.container.reminderScheduler
+                    ) as T
                 }
             }
     }

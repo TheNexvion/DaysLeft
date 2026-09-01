@@ -14,8 +14,14 @@ interface EventDao {
     @Query("SELECT * FROM events ORDER BY date ASC")
     fun getAllEvents(): Flow<List<Event>>
 
+    @Query("SELECT * FROM events ORDER BY date ASC")
+    suspend fun getAllEventsDirect(): List<Event>
+
     @Query("SELECT * FROM events WHERE id = :eventId")
     fun getEventById(eventId: Long): Flow<Event?>
+
+    @Query("SELECT * FROM events WHERE id = :eventId")
+    suspend fun getEventByIdDirect(eventId: Long): Event?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEvent(event: Event): Long

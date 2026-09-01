@@ -4,31 +4,51 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.daysleft.data.local.AppDatabase
+import com.daysleft.DaysLeftApplication
 import com.daysleft.data.local.Event
 import com.daysleft.data.repository.EventRepository
+import com.daysleft.reminder.ReminderScheduler
+import com.daysleft.util.EventValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 data class EditEventUiState(
     val title: String = "",
     val date: LocalDate? = null,
+    val remindersEnabled: Boolean = true,
+    val remindSevenDaysBefore: Boolean = true,
+    val remindOneDayBefore: Boolean = true,
+    val remindOnDay: Boolean = true,
+    val reminderHour: Int = 9,
+    val reminderMinute: Int = 0,
     val titleError: String? = null,
     val dateError: String? = null,
     val isLoading: Boolean = true,
     val isUpdated: Boolean = false,
+    val isDeleted: Boolean = false,
     val isDirty: Boolean = false,
     val originalTitle: String = "",
-    val originalDate: LocalDate? = null
+    val originalDate: LocalDate? = null,
+    val originalRemindersEnabled: Boolean = true,
+    val originalRemindSevenDaysBefore: Boolean = true,
+    val originalRemindOneDayBefore: Boolean = true,
+    val originalRemindOnDay: Boolean = true,
+    val originalReminderHour: Int = 9,
+    val originalReminderMinute: Int = 0
 )
 
+/**
+ * ViewModel for viewing, updating, and deleting an existing countdown event.
+ */
 class EditEventViewModel(
     private val repository: EventRepository,
-    private val eventId: Long
+    private val eventId: Long,
+    private val reminderScheduler: ReminderScheduler? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditEventUiState())
@@ -45,59 +65,127 @@ class EditEventViewModel(
                 _uiState.value = EditEventUiState(
                     title = event.title,
                     date = event.date,
+                    remindersEnabled = event.remindersEnabled,
+                    remindSevenDaysBefore = event.remindSevenDaysBefore,
+                    remindOneDayBefore = event.remindOneDayBefore,
+                    remindOnDay = event.remindOnDay,
+                    reminderHour = event.reminderHour,
+                    reminderMinute = event.reminderMinute,
                     isLoading = false,
                     originalTitle = event.title,
-                    originalDate = event.date
+                    originalDate = event.date,
+                    originalRemindersEnabled = event.remindersEnabled,
+                    originalRemindSevenDaysBefore = event.remindSevenDaysBefore,
+                    originalRemindOneDayBefore = event.remindOneDayBefore,
+                    originalRemindOnDay = event.remindOnDay,
+                    originalReminderHour = event.reminderHour,
+                    originalReminderMinute = event.reminderMinute
                 )
             } else {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
+    private fun checkDirty(state: EditEventUiState): Boolean {
+        return state.title != state.originalTitle ||
+                state.date != state.originalDate ||
+                state.remindersEnabled != state.originalRemindersEnabled ||
+                state.remindSevenDaysBefore != state.originalRemindSevenDaysBefore ||
+                state.remindOneDayBefore != state.originalRemindOneDayBefore ||
+                state.remindOnDay != state.originalRemindOnDay ||
+                state.reminderHour != state.originalReminderHour ||
+                state.reminderMinute != state.originalReminderMinute
+    }
+
     fun updateTitle(title: String) {
-        val state = _uiState.value
-        _uiState.value = state.copy(
-            title = title,
-            titleError = null,
-            isDirty = title != state.originalTitle || state.date != state.originalDate
-        )
+        _uiState.update { state ->
+            val updated = state.copy(title = title, titleError = null)
+            updated.copy(isDirty = checkDirty(updated))
+        }
     }
 
     fun updateDate(date: LocalDate) {
-        val state = _uiState.value
-        _uiState.value = state.copy(
-            date = date,
-            dateError = null,
-            isDirty = state.title != state.originalTitle || date != state.originalDate
-        )
+        _uiState.update { state ->
+            val updated = state.copy(date = date, dateError = null)
+            updated.copy(isDirty = checkDirty(updated))
+        }
+    }
+
+    fun updateRemindersEnabled(enabled: Boolean) {
+        _uiState.update { state ->
+            val updated = state.copy(remindersEnabled = enabled)
+            updated.copy(isDirty = checkDirty(updated))
+        }
+    }
+
+    fun updateRemindSevenDaysBefore(enabled: Boolean) {
+        _uiState.update { state ->
+            val updated = state.copy(remindSevenDaysBefore = enabled)
+            updated.copy(isDirty = checkDirty(updated))
+        }
+    }
+
+    fun updateRemindOneDayBefore(enabled: Boolean) {
+        _uiState.update { state ->
+            val updated = state.copy(remindOneDayBefore = enabled)
+            updated.copy(isDirty = checkDirty(updated))
+        }
+    }
+
+    fun updateRemindOnDay(enabled: Boolean) {
+        _uiState.update { state ->
+            val updated = state.copy(remindOnDay = enabled)
+            updated.copy(isDirty = checkDirty(updated))
+        }
+    }
+
+    fun updateReminderTime(hour: Int, minute: Int) {
+        _uiState.update { state ->
+            val updated = state.copy(reminderHour = hour, reminderMinute = minute)
+            updated.copy(isDirty = checkDirty(updated))
+        }
     }
 
     fun updateEvent() {
         val state = _uiState.value
-        var hasError = false
+        val validation = EventValidator.validate(state.title, state.date)
 
-        if (state.title.isBlank()) {
-            _uiState.value = state.copy(titleError = "Please enter an event name")
-            hasError = true
+        if (!validation.isValid) {
+            _uiState.update {
+                it.copy(
+                    titleError = validation.titleError,
+                    dateError = validation.dateError
+                )
+            }
+            return
         }
-
-        if (state.date == null) {
-            _uiState.value = _uiState.value.copy(dateError = "Please select a date")
-            hasError = true
-        }
-
-        if (hasError) return
 
         viewModelScope.launch {
-            repository.updateEvent(
-                Event(
-                    id = eventId,
-                    title = state.title.trim(),
-                    date = state.date!!
-                )
+            val updatedEvent = Event(
+                id = eventId,
+                title = state.title.trim(),
+                date = state.date!!,
+                remindersEnabled = state.remindersEnabled,
+                remindSevenDaysBefore = state.remindSevenDaysBefore,
+                remindOneDayBefore = state.remindOneDayBefore,
+                remindOnDay = state.remindOnDay,
+                reminderHour = state.reminderHour,
+                reminderMinute = state.reminderMinute
             )
-            _uiState.value = _uiState.value.copy(isUpdated = true)
+
+            repository.updateEvent(updatedEvent)
+            reminderScheduler?.scheduleEventReminders(updatedEvent)
+
+            _uiState.update { it.copy(isUpdated = true) }
+        }
+    }
+
+    fun deleteEvent() {
+        viewModelScope.launch {
+            reminderScheduler?.cancelEventReminders(eventId)
+            repository.deleteEventById(eventId)
+            _uiState.update { it.copy(isDeleted = true) }
         }
     }
 
@@ -110,10 +198,12 @@ class EditEventViewModel(
                     extras: CreationExtras
                 ): T {
                     val application =
-                        extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
-                    val database = AppDatabase.getInstance(application)
-                    val repository = EventRepository(database.eventDao())
-                    return EditEventViewModel(repository, eventId) as T
+                        extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as DaysLeftApplication
+                    return EditEventViewModel(
+                        repository = application.container.repository,
+                        eventId = eventId,
+                        reminderScheduler = application.container.reminderScheduler
+                    ) as T
                 }
             }
     }

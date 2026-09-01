@@ -18,9 +18,13 @@ class FakeEventDao : EventDao {
 
     override fun getAllEvents(): Flow<List<Event>> = eventsFlow
 
+    override suspend fun getAllEventsDirect(): List<Event> = eventsMap.values.sortedBy { it.date }
+
     override fun getEventById(eventId: Long): Flow<Event?> = eventsFlow.map { list ->
         list.find { it.id == eventId }
     }
+
+    override suspend fun getEventByIdDirect(eventId: Long): Event? = eventsMap[eventId]
 
     override suspend fun insertEvent(event: Event): Long {
         val id = if (event.id == 0L) currentId++ else event.id

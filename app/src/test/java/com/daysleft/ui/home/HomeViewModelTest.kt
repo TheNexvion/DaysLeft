@@ -42,4 +42,17 @@ class HomeViewModelTest {
         assertEquals(1, events.size)
         assertEquals("Vacation", events[0].title)
     }
+
+    @Test
+    fun events_orderedChronologicallyByDate() = runTest {
+        repository.insertEvent(Event(title = "Later Event", date = LocalDate.of(2026, 12, 25)))
+        repository.insertEvent(Event(title = "Earlier Event", date = LocalDate.of(2026, 10, 5)))
+        repository.insertEvent(Event(title = "Middle Event", date = LocalDate.of(2026, 11, 15)))
+
+        val events = viewModel.events.first()
+        assertEquals(3, events.size)
+        assertEquals("Earlier Event", events[0].title)
+        assertEquals("Middle Event", events[1].title)
+        assertEquals("Later Event", events[2].title)
+    }
 }

@@ -29,7 +29,13 @@ class EditEventViewModelTest {
         fakeDao = FakeEventDao()
         repository = EventRepository(fakeDao)
         eventId = repository.insertEvent(
-            Event(title = "Original Title", date = LocalDate.of(2026, 9, 10))
+            Event(
+                title = "Original Title",
+                date = LocalDate.of(2026, 9, 10),
+                remindersEnabled = true,
+                reminderHour = 9,
+                reminderMinute = 0
+            )
         )
     }
 
@@ -40,6 +46,9 @@ class EditEventViewModelTest {
 
         assertEquals("Original Title", state.title)
         assertEquals(LocalDate.of(2026, 9, 10), state.date)
+        assertTrue(state.remindersEnabled)
+        assertEquals(9, state.reminderHour)
+        assertEquals(0, state.reminderMinute)
         assertFalse(state.isLoading)
         assertFalse(state.isDirty)
     }
@@ -51,6 +60,18 @@ class EditEventViewModelTest {
 
         assertTrue(viewModel.uiState.value.isDirty)
         assertEquals("Modified Title", viewModel.uiState.value.title)
+    }
+
+    @Test
+    fun editingReminders_marksDirty() = runTest {
+        val viewModel = EditEventViewModel(repository, eventId)
+        viewModel.updateRemindersEnabled(false)
+
+        assertTrue(viewModel.uiState.value.isDirty)
+        assertFalse(viewModel.uiState.value.remindersEnabled)
+
+        viewModel.updateRemindersEnabled(true)
+        assertFalse(viewModel.uiState.value.isDirty)
     }
 
     @Test
@@ -69,6 +90,7 @@ class EditEventViewModelTest {
         val newDate = LocalDate.of(2026, 12, 25)
         viewModel.updateTitle("Updated Title")
         viewModel.updateDate(newDate)
+        viewModel.updateReminderTime(11, 45)
         viewModel.updateEvent()
 
         assertTrue(viewModel.uiState.value.isUpdated)
@@ -76,5 +98,18 @@ class EditEventViewModelTest {
         val updated = repository.getEventById(eventId).first()
         assertEquals("Updated Title", updated?.title)
         assertEquals(newDate, updated?.date)
+        assertEquals(11, updated?.reminderHour)
+        assertEquals(45, updated?.reminderMinute)
+    }
+
+    @Test
+    fun deleteEvent_successful() = runTest {
+        val viewModel = EditEventViewModel(repository, eventId)
+        viewModel.deleteEvent()
+
+        assertTrue(viewModel.uiState.value.isDeleted)
+
+        val updated = repository.getEventById(eventId).first()
+        assertNull(updated)
     }
 }
