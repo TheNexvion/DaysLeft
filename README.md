@@ -8,6 +8,22 @@ A minimal, modern, offline-first Android countdown application designed to help 
 
 ---
 
+## Download
+
+Download the latest production Android APK directly from GitHub Releases:
+
+- 📦 **Latest Release:** [Days Left v1.0.0](https://github.com/TheNexvion/DaysLeft/releases/tag/v1.0.0)
+- ⬇️ **Direct APK Download:** [DaysLeft-v1.0.0.apk](https://github.com/TheNexvion/DaysLeft/releases/download/v1.0.0/DaysLeft-v1.0.0.apk)
+
+### Installation Steps
+
+1. Download **`DaysLeft-v1.0.0.apk`** on your Android device (Android 8.0+ / API 26+).
+2. Open the downloaded APK from your browser downloads or file manager.
+3. If prompted by Android, allow installation from unknown sources for that app.
+4. Tap **Install** and launch **Days Left**.
+
+---
+
 ## Features
 
 - **Event Countdowns** — See exact days left until birthdays, exams, vacations, anniversaries, and holidays.
