@@ -39,9 +39,32 @@ Download the latest production Android APK directly from GitHub Releases:
 
 ## Screenshots
 
-| Home Screen | Add Countdown | Event Details | Edit Countdown |
-| :---: | :---: | :---: | :---: |
-| ![Home Screen](docs/images/home.png) | ![Add Countdown](docs/images/add-event.png) | ![Event Details](docs/images/event-details.png) | ![Edit Countdown](docs/images/edit-event.png) |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="center" width="25%">Home Screen</th>
+      <th align="center" width="25%">Add Countdown</th>
+      <th align="center" width="25%">Event Details</th>
+      <th align="center" width="25%">Edit Countdown</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="25%">
+        <img src="docs/images/home.png" alt="Home Screen" width="100%" />
+      </td>
+      <td align="center" valign="top" width="25%">
+        <img src="docs/images/add-event.png" alt="Add Countdown" width="100%" />
+      </td>
+      <td align="center" valign="top" width="25%">
+        <img src="docs/images/event-details.png" alt="Event Details" width="100%" />
+      </td>
+      <td align="center" valign="top" width="25%">
+        <img src="docs/images/edit-event.png" alt="Edit Countdown" width="100%" />
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
